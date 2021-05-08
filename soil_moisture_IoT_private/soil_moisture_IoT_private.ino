@@ -12,21 +12,29 @@ float sensorValue = 0;
 uint8_t ledPin = D6;
 String command = "Auto";  
 
-const char *ssid = "your-wifi-sid"; 
-const char *password = "your-wifi-password";
+const char *ssid = "Cigowong"; 
+const char *password = "assalamualaikum";
+
+const int AirValue = 620;  
+const int WaterValue = 310;
 
 
 /************************* MQTT Broker Setup *********************************/
 
-#define SERVER      "your-server-ip-or-name"
-#define SERVERPORT  1883                   // use 8883 for SSL
-#define USERNAME    "your-mqtt-username"
-#define KEY         "your-mqtt-key"
+//#define SERVER      "io.adafruit.com"
+//#define SERVERPORT  1883                   // use 8883 for SSL
+//#define USERNAME    "kasmad"
+//#define KEY         "aio_uLuz96fvYnamN8D0V7Upzhuv2Pv6"
+
+#define SERVER      "144.217.86.1"
+#define SERVERPORT  1883                   
+#define USERNAME    "renzcybermedia"
+#define KEY         "laurens23"
 
 WiFiClient client;
 Adafruit_MQTT_Client mqtt(&client, SERVER, SERVERPORT, USERNAME, KEY);
-Adafruit_MQTT_Publish soilMoisture = Adafruit_MQTT_Publish(&mqtt, "feeds/moisture");
-Adafruit_MQTT_Subscribe waterBtn = Adafruit_MQTT_Subscribe(&mqtt, "feeds/water_the_plants");
+Adafruit_MQTT_Publish soilMoisture = Adafruit_MQTT_Publish(&mqtt, "kasmad/feeds/humidity-meter");
+Adafruit_MQTT_Subscribe waterBtn = Adafruit_MQTT_Subscribe(&mqtt, "kasmad/feeds/water-the-plants");
 
 void MQTT_connect();
 
@@ -58,11 +66,9 @@ void loop() {
       Serial.print(F("Got: "));
       Serial.println((char *)waterBtn.lastread);
       command = (char *)waterBtn.lastread;
-      if(command.equals("Start")){
-//        digitalWrite(ledPin, HIGH);
+      if(command.equals("On")){
           turnOnMotor();
-      } else if (command.equals("Stop")){
-//        digitalWrite(ledPin, LOW);
+      } else if (command.equals("Off")){
         turnOffMotor();
         command = "Auto";
       }
@@ -83,12 +89,8 @@ void loop() {
   /* auto siram */
  if (command.equals("Auto")){ 
    if (sensorValue >= 41 && sensorValue <= 80){
-//    digitalWrite(ledPin, LOW);
-//    Serial.println(digitalRead(ledPin));
     turnOffMotor();
    } else if(sensorValue < 41) {
-//    digitalWrite(ledPin, HIGH);
-//    Serial.println(digitalRead(ledPin));
     turnOnMotor();
    }
  }
@@ -126,9 +128,13 @@ float getMoistureVal(int moisturePin){
   float moisture_percentage;
   int sensor_analog;
   sensor_analog = analogRead(moisturePin);
-  moisture_percentage = ( 100 - ( (sensor_analog/1023.00) * 100 ) );
+  //  moisture_percentage = ( 100 - ( (sensor_analog/1023.00) * 100 ) ); // resistive sensor
+  moisture_percentage = map(sensor_analog, AirValue, WaterValue, 0, 100); // capacitive sensor
+  if(moisture_percentage >= 100) moisture_percentage = 100;
+  else if(moisture_percentage <= 0) moisture_percentage = 0;
+  else if(moisture_percentage > 0 && moisture_percentage < 100 <= 0) moisture_percentage;
   delay(1000);
- return moisture_percentage;
+  return moisture_percentage;
 }
 
 void turnOnMotor(){
