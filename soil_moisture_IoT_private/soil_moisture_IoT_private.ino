@@ -16,14 +16,8 @@ float sensorValue = 0;
 //uint8_t ledPin = D6;
 String command = "Auto";
 
-//const char *ssid = "Ganeshlabs";
-//const char *password = "8cadb11f56";
-
-//const char *ssid = "_IdiotInside_plus";
-//const char *password = "kukulutusbae";
-
-const char *ssid = "Cigowong";
-const char *password = "assalamualaikum";
+const char *ssid = "yourwifiname";
+const char *password = "yourwifipassword";
 
 const int AirValue = 620;
 const int WaterValue = 310;
